@@ -123,6 +123,7 @@ class SMBO(BOBase):
         self.num_objs = num_objs
         self.num_constraints = num_constraints
         self.FAILED_PERF = [MAXINT] * num_objs
+        self.current_context = None
         super().__init__(objective_function, config_space, task_id=task_id, output_dir=logging_dir,
                          random_state=random_state, initial_runs=initial_runs, max_runs=max_runs,
                          runtime_limit=runtime_limit, sample_strategy=sample_strategy,
@@ -147,6 +148,7 @@ class SMBO(BOBase):
                                           task_id=task_id,
                                           output_dir=logging_dir,
                                           random_state=random_state,
+                                          current_context = self.current_context,
                                           **advisor_kwargs)
         elif advisor_type == 'mcadvisor':
             from openbox.core.mc_advisor import MCAdvisor
@@ -252,7 +254,7 @@ class SMBO(BOBase):
             # update observation to advisor
             observation = Observation(
                 config=config, objs=objs, constraints=constraints,
-                trial_state=trial_state, elapsed_time=elapsed_time,
+                trial_state=trial_state, elapsed_time=elapsed_time, context=self.current_context,
             )
             if _time_limit_per_trial != self.time_limit_per_trial and trial_state == TIMEOUT:
                 # Timeout in the last iteration.

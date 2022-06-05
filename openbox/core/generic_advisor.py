@@ -37,6 +37,7 @@ class Advisor(object, metaclass=abc.ABCMeta):
                  output_dir='logs',
                  task_id='default_task_id',
                  random_state=None,
+                 current_context=None,
                  **kwargs):
 
         # Create output (logging) directory.
@@ -65,7 +66,7 @@ class Advisor(object, metaclass=abc.ABCMeta):
         self.config_space_seed = self.rng.randint(MAXINT)
         self.config_space.seed(self.config_space_seed)
         self.ref_point = ref_point
-
+        self.current_context = current_context
         # init history container
         if self.num_objs == 1:
             self.history_container = HistoryContainer(task_id, self.num_constraints, config_space=self.config_space)
@@ -89,6 +90,7 @@ class Advisor(object, metaclass=abc.ABCMeta):
         self.algo_auto_selection()
         self.check_setup()
         self.setup_bo_basics()
+
 
     def algo_auto_selection(self):
         from ConfigSpace import UniformFloatHyperparameter, UniformIntegerHyperparameter, \
@@ -349,7 +351,11 @@ class Advisor(object, metaclass=abc.ABCMeta):
 
             # train surrogate model
             if self.num_objs == 1:
-                self.surrogate_model.train(X, Y)
+                if self.surrogate_type == 'context_prf':
+                    contexts = history_container.get_contexts()
+                    self.surrogate_model.train(X, Y,  contexts = contexts)
+                else:
+                    self.surrogate_model.train(X, Y)
             elif self.acq_type == 'parego':
                 weights = self.rng.random_sample(self.num_objs)
                 weights = weights / np.sum(weights)

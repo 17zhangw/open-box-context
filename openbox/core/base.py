@@ -7,12 +7,13 @@ from openbox.utils.util_funcs import get_types
 
 
 class Observation(object):
-    def __init__(self, config, objs, constraints=None, trial_state=SUCCESS, elapsed_time=None):
+    def __init__(self, config, objs, constraints=None, trial_state=SUCCESS, elapsed_time=None, context=None):
         self.config = config
         self.objs = objs
         self.constraints = constraints
         self.trial_state = trial_state
         self.elapsed_time = elapsed_time
+        self.context = context
 
     def __repr__(self):
         return self.__str__()
@@ -24,6 +25,7 @@ class Observation(object):
                + (", constraints=%s" % self.constraints if self.constraints is not None else "") \
                + ", trial_state=%s" % self.trial_state \
                + (", elapsed_time=%s" % self.elapsed_time if self.elapsed_time is not None else "") \
+               + (", context=%s" % self.context if self.context is not None else "") \
                + ")"
 
 
@@ -113,6 +115,9 @@ def build_surrogate(func_str='gp', config_space=None, rng=None, history_hpo_data
                   'please install pyrfr: '
                   'https://open-box.readthedocs.io/en/latest/installation/install_pyrfr.html')
             return skRandomForestWithInstances(types=types, bounds=bounds, seed=seed)
+    elif func_str == 'context_prf':
+        from  openbox.surrogate.base.rf_with_contexts import RandomForestWithContexts
+        return RandomForestWithContexts(types=types, bounds=bounds, seed=seed)
 
     elif func_str == 'sk_prf':
         from openbox.surrogate.base.rf_with_instances_sklearn import skRandomForestWithInstances

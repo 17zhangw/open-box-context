@@ -25,12 +25,18 @@ if __name__ == "__main__":
     opt = Optimizer(
         branin,
         space,
-        max_runs=50,
+        max_runs=10,
         # surrogate_type='gp',
-        surrogate_type='auto',
+        surrogate_type='context_prf',
         time_limit_per_trial=30,
         task_id='quick_start',
     )
+    opt.current_context = np.random.uniform(size=(1, 10))
+    opt.config_advisor.current_context = opt.current_context
+    history = opt.run()
+
+    opt.max_iterations = 20
+
     history = opt.run()
 
     print(history)

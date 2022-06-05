@@ -36,6 +36,7 @@ class HistoryContainer(object):
         self.constraint_perfs = list()  # all constraints
         self.trial_states = list()  # all trial states
         self.elapsed_times = list()  # all elapsed times
+        self.contexts = list()
 
         self.update_times = list()  # record all update times
 
@@ -57,6 +58,7 @@ class HistoryContainer(object):
         constraints = observation.constraints
         trial_state = observation.trial_state
         elapsed_time = observation.elapsed_time
+        context = observation.context
 
         self.configurations.append(config)
         if self.num_objs == 1:
@@ -66,7 +68,7 @@ class HistoryContainer(object):
         self.constraint_perfs.append(constraints)  # None if no constraint
         self.trial_states.append(trial_state)
         self.elapsed_times.append(elapsed_time)
-
+        self.contexts.append(context)
         transform_perf = False
         failed = False
         if trial_state == SUCCESS and all(perf < MAXINT for perf in objs):
@@ -136,6 +138,9 @@ class HistoryContainer(object):
         transformed_perfs = np.array(transformed_perfs, dtype=np.float64)
         transformed_perfs = get_transform_function(transform)(transformed_perfs)
         return transformed_perfs
+
+    def get_contexts(self):
+        return np.vstack(self.contexts)
 
     def get_transformed_constraint_perfs(self, transform='bilog'):
         if self.num_constraints == 0:
