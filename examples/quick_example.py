@@ -30,13 +30,14 @@ if __name__ == "__main__":
         surrogate_type='context_prf',
         time_limit_per_trial=30,
         task_id='quick_start',
+        current_context= np.random.uniform(size=(1, 5))
     )
-    opt.current_context = np.random.uniform(size=(1, 10))
-    opt.config_advisor.current_context = opt.current_context
+
     history = opt.run()
 
     opt.max_iterations = 20
 
+    opt.reset_context(np.random.uniform(size=(1, 5)))
     history = opt.run()
 
     print(history)
