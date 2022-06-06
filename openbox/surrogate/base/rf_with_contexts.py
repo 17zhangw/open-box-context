@@ -36,7 +36,7 @@ class RandomForestWithContexts(AbstractModel):
 
     def __init__(self, types: np.ndarray,
                  bounds: typing.List[typing.Tuple[float, float]],
-                 context_len: int=10,
+                 current_context: np.ndarray=None,
                  log_y: bool=False,
                  num_trees: int=N_TREES,
                  do_bootstrapping: bool=True,
@@ -87,10 +87,10 @@ class RandomForestWithContexts(AbstractModel):
             The seed that is passed to the random_forest_run library.
         """
         super().__init__(types, bounds, **kwargs)
-        self.types =  np.append(np.zeros(context_len), self.types)
-        self.bounds = np.vstack((np.array([[0.0,1.1]]).repeat(context_len, axis=0), self.bounds))
-        self.current_context = np.zeros((1, context_len))
-        self.context_len = context_len
+        self.current_context = current_context
+        self.context_len = current_context.flatten().shape[0]
+        self.types = np.append(np.zeros(self.context_len), self.types)
+        self.bounds = np.vstack((np.array([[0.0,1.1]]).repeat(self.context_len, axis=0), self.bounds))
         self.log_y = log_y
         self.rng = regression.default_random_engine(seed)
 

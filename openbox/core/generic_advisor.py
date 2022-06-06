@@ -229,7 +229,8 @@ class Advisor(object, metaclass=abc.ABCMeta):
             self.surrogate_model = build_surrogate(func_str=self.surrogate_type,
                                                    config_space=self.config_space,
                                                    rng=self.rng,
-                                                   history_hpo_data=self.history_bo_data)
+                                                   history_hpo_data=self.history_bo_data,
+                                                   current_context=self.current_context)
         else:  # multi-objectives
             self.surrogate_model = [build_surrogate(func_str=self.surrogate_type,
                                                     config_space=self.config_space,

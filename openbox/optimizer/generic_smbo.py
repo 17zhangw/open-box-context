@@ -6,6 +6,7 @@ import traceback
 import math
 from typing import List
 from collections import OrderedDict
+import numpy as np
 from tqdm import tqdm
 from openbox.optimizer.base import BOBase
 from openbox.utils.constants import MAXINT, SUCCESS, FAILED, TIMEOUT
@@ -115,6 +116,7 @@ class SMBO(BOBase):
                  task_id='default_task_id',
                  random_state=None,
                  advisor_kwargs: dict = None,
+                 current_context: np.ndarray=None,
                  **kwargs):
 
         if task_id is None:
@@ -123,7 +125,7 @@ class SMBO(BOBase):
         self.num_objs = num_objs
         self.num_constraints = num_constraints
         self.FAILED_PERF = [MAXINT] * num_objs
-        self.current_context = None
+        self.current_context = current_context
         super().__init__(objective_function, config_space, task_id=task_id, output_dir=logging_dir,
                          random_state=random_state, initial_runs=initial_runs, max_runs=max_runs,
                          runtime_limit=runtime_limit, sample_strategy=sample_strategy,
@@ -215,6 +217,13 @@ class SMBO(BOBase):
             runtime = time.time() - start_time
             self.budget_left -= runtime
         return self.get_history()
+
+
+    def reset_context(self, context):
+        self.current_context = context
+        self.config_advisor.current_context = context
+        self.config_advisor.surrogate_model.current_context = context
+
 
     def iterate(self, budget_left=None):
         # get configuration suggestion from advisor

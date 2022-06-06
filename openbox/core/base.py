@@ -100,7 +100,7 @@ def build_optimizer(func_str='local_random', acq_func=None, config_space=None, r
                      rng=rng)
 
 
-def build_surrogate(func_str='gp', config_space=None, rng=None, history_hpo_data=None):
+def build_surrogate(func_str='gp', config_space=None, rng=None, history_hpo_data=None, current_context=None):
     assert config_space is not None
     func_str = func_str.lower()
     types, bounds = get_types(config_space)
@@ -117,7 +117,7 @@ def build_surrogate(func_str='gp', config_space=None, rng=None, history_hpo_data
             return skRandomForestWithInstances(types=types, bounds=bounds, seed=seed)
     elif func_str == 'context_prf':
         from  openbox.surrogate.base.rf_with_contexts import RandomForestWithContexts
-        return RandomForestWithContexts(types=types, bounds=bounds, seed=seed)
+        return RandomForestWithContexts(types=types, bounds=bounds, seed=seed, current_context=current_context)
 
     elif func_str == 'sk_prf':
         from openbox.surrogate.base.rf_with_instances_sklearn import skRandomForestWithInstances
