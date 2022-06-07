@@ -107,8 +107,8 @@ class RandomForestWithContexts(AbstractModel):
             self.context_scaler = None
             self.context_len = self.contetx_n_feats
 
-        self.types = np.append(np.zeros(self.context_len), self.types)
-        self.bounds = np.vstack((np.array([[0.0,1.1]]).repeat(self.context_len, axis=0), self.bounds))
+        self.types = np.append(self.types, np.zeros(self.context_len))
+        self.bounds = np.vstack((self.bounds, (np.array([[0.0,1.1]]).repeat(self.context_len, axis=0))))
         self.log_y = log_y
         self.rng = regression.default_random_engine(seed)
 
@@ -151,7 +151,6 @@ class RandomForestWithContexts(AbstractModel):
         -------
         self
         """
-
         if self.context_pca and X.shape[0] > self.context_pca.n_components:
             # scale features
             X_feats = self.context_scaler.fit_transform(contexts)
