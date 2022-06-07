@@ -26,18 +26,19 @@ if __name__ == "__main__":
         branin,
         space,
         max_runs=10,
-        # surrogate_type='gp',
+        #surrogate_type='gp',
         surrogate_type='context_prf',
         time_limit_per_trial=30,
         task_id='quick_start',
-        current_context= np.random.uniform(size=(1, 5))
+       current_context= np.random.uniform(size=(1, 10)),
+        context_pca_components=4,
     )
 
     history = opt.run()
 
     opt.max_iterations = 20
 
-    opt.reset_context(np.random.uniform(size=(1, 5)))
+    opt.reset_context(np.random.uniform(size=(1, 10)))
     history = opt.run()
 
     print(history)

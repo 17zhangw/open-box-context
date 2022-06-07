@@ -117,6 +117,7 @@ class SMBO(BOBase):
                  random_state=None,
                  advisor_kwargs: dict = None,
                  current_context: np.ndarray=None,
+                 context_pca_components: int=6,
                  **kwargs):
 
         if task_id is None:
@@ -126,6 +127,7 @@ class SMBO(BOBase):
         self.num_constraints = num_constraints
         self.FAILED_PERF = [MAXINT] * num_objs
         self.current_context = current_context
+        self.context_pca_components = context_pca_components
         super().__init__(objective_function, config_space, task_id=task_id, output_dir=logging_dir,
                          random_state=random_state, initial_runs=initial_runs, max_runs=max_runs,
                          runtime_limit=runtime_limit, sample_strategy=sample_strategy,
@@ -151,6 +153,7 @@ class SMBO(BOBase):
                                           output_dir=logging_dir,
                                           random_state=random_state,
                                           current_context = self.current_context,
+                                          context_pca_components = self.context_pca_components,
                                           **advisor_kwargs)
         elif advisor_type == 'mcadvisor':
             from openbox.core.mc_advisor import MCAdvisor

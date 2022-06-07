@@ -7,6 +7,9 @@ import typing
 
 import numpy as np
 from pyrfr import regression
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.exceptions import NotFittedError
 
 from openbox.surrogate.base.base_model import  AbstractModel
 from openbox.utils.constants import N_TREES
@@ -37,6 +40,7 @@ class RandomForestWithContexts(AbstractModel):
     def __init__(self, types: np.ndarray,
                  bounds: typing.List[typing.Tuple[float, float]],
                  current_context: np.ndarray=None,
+                 context_pca_components: int=5,
                  log_y: bool=False,
                  num_trees: int=N_TREES,
                  do_bootstrapping: bool=True,
@@ -87,12 +91,27 @@ class RandomForestWithContexts(AbstractModel):
             The seed that is passed to the random_forest_run library.
         """
         super().__init__(types, bounds, **kwargs)
+        self.logger = logging.getLogger(self.__module__ + "." +
+                                        self.__class__.__name__)
+
         self.current_context = current_context
-        self.context_len = current_context.flatten().shape[0]
+        self.context_pca_components = context_pca_components
+        self.contetx_n_feats = current_context.flatten().shape[0]
+        if self.context_pca_components and self.contetx_n_feats > self.context_pca_components:
+            self.context_pca = PCA(n_components=self.context_pca_components)
+            self.context_scaler = MinMaxScaler()
+            self.context_len = self.context_pca_components
+            self.logger.info("Use PCA for context, convert dimension {} to {}".format(self.contetx_n_feats, self.context_pca_components))
+        else:
+            self.context_pca = None
+            self.context_scaler = None
+            self.context_len = self.contetx_n_feats
+
         self.types = np.append(np.zeros(self.context_len), self.types)
         self.bounds = np.vstack((np.array([[0.0,1.1]]).repeat(self.context_len, axis=0), self.bounds))
         self.log_y = log_y
         self.rng = regression.default_random_engine(seed)
+
 
         self.rf_opts = regression.forest_opts()
         self.rf_opts.num_trees = num_trees
@@ -116,8 +135,7 @@ class RandomForestWithContexts(AbstractModel):
                        min_samples_leaf, max_depth, eps_purity, seed]
         self.seed = seed
 
-        self.logger = logging.getLogger(self.__module__ + "." +
-                                        self.__class__.__name__)
+
 
     def _train(self, X: np.ndarray, y: np.ndarray, contexts: np.ndarray):
         """Trains the random forest on X and y.
@@ -133,7 +151,25 @@ class RandomForestWithContexts(AbstractModel):
         -------
         self
         """
-        self.X = np.hstack((X, contexts))
+
+        if self.context_pca and X.shape[0] > self.context_pca.n_components:
+            # scale features
+            X_feats = self.context_scaler.fit_transform(contexts)
+            X_feats = np.nan_to_num(contexts)  # if features with max == min
+            # PCA
+            X_feats = self.context_pca.fit_transform(contexts)
+            self.X = np.hstack((X, X_feats))
+            '''if hasattr(self, "types"):
+                # for RF, adapt types list
+                # if X_feats.shape[0] < self.pca, X_feats.shape[1] ==
+                # X_feats.shape[0]
+                self.types = np.array(
+                    np.hstack((self.types[:self.n_params], np.zeros((X_feats.shape[1])))),
+                    dtype=np.uint,
+                )'''
+        else:
+            self.X = np.hstack((X, contexts))
+
         self.y = y.flatten()
 
         if self.n_points_per_tree <= 0:
@@ -202,7 +238,17 @@ class RandomForestWithContexts(AbstractModel):
         else:
             self.current_context = current_context
 
-        X = np.hstack((X, current_context.reshape(1, -1).repeat(X.shape[0], axis=0)))
+        if self.context_pca:
+            try:
+                X_feats = current_context.reshape(1, -1).repeat(X.shape[0], axis=0)
+                X_feats = self.context_scaler.transform(X_feats)
+                X_feats = self.context_pca.transform(X_feats)
+                self.logger.debug("Convert {} t0 {}".format(current_context, X_feats[0]))
+                X = np.hstack((X, X_feats))
+            except NotFittedError:
+                pass  # PCA not fitted if only one training sample
+        else:
+            X = np.hstack((X, current_context.reshape(1, -1).repeat(X.shape[0], axis=0)))
 
         means, vars_ = [], []
         for row_X in X:
@@ -272,7 +318,16 @@ class RandomForestWithContexts(AbstractModel):
         else:
             self.current_context = current_context
 
-        X = np.hstack(X, current_context.reshape(1, -1).repeat(X.shape[0], axis=0))
+        if self.context_pca:
+            try:
+                X_feats = current_context.reshape(1, -1).repeat(X.shape[0], axis=0)
+                X_feats = self.context_scaler.transform(X_feats)
+                X_feats = self.context_pca.transform(X_feats)
+                X = np.hstack((X, X_feats))
+            except NotFittedError:
+                pass  # PCA not fitted if only one training sample
+        else:
+            X = np.hstack((X, current_context.reshape(1, -1).repeat(X.shape[0], axis=0)))
 
         mean = np.zeros(X.shape[0])
         var = np.zeros(X.shape[0])

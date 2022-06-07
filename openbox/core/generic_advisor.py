@@ -38,6 +38,7 @@ class Advisor(object, metaclass=abc.ABCMeta):
                  task_id='default_task_id',
                  random_state=None,
                  current_context=None,
+                 context_pca_components=6,
                  **kwargs):
 
         # Create output (logging) directory.
@@ -67,6 +68,7 @@ class Advisor(object, metaclass=abc.ABCMeta):
         self.config_space.seed(self.config_space_seed)
         self.ref_point = ref_point
         self.current_context = current_context
+        self.context_pca_components = context_pca_components
         # init history container
         if self.num_objs == 1:
             self.history_container = HistoryContainer(task_id, self.num_constraints, config_space=self.config_space)
@@ -230,7 +232,8 @@ class Advisor(object, metaclass=abc.ABCMeta):
                                                    config_space=self.config_space,
                                                    rng=self.rng,
                                                    history_hpo_data=self.history_bo_data,
-                                                   current_context=self.current_context)
+                                                   current_context=self.current_context,
+                                                   context_pca_components=self.context_pca_components)
         else:  # multi-objectives
             self.surrogate_model = [build_surrogate(func_str=self.surrogate_type,
                                                     config_space=self.config_space,
