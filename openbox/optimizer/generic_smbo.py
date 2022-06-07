@@ -238,10 +238,12 @@ class SMBO(BOBase):
             start_time = time.time()
             try:
                 # evaluate configuration on objective_function within time_limit_per_trial
-                args, kwargs = (config,), dict()
-                timeout_status, _result = time_limit(self.objective_function,
-                                                     _time_limit_per_trial,
-                                                     args=args, kwargs=kwargs)
+                #args, kwargs = (config,), dict()
+                #timeout_status, _result = time_limit(self.objective_function,
+                #                                     _time_limit_per_trial,
+                #                                     args=args, kwargs=kwargs)
+                _result = self.objective_function(config)
+                timeout_status = False
                 if timeout_status:
                     raise TimeoutException(
                         'Timeout: time limit for this evaluation is %.1fs' % _time_limit_per_trial)
