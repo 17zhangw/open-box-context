@@ -113,7 +113,7 @@ class RandomForestWithInstances(AbstractModel):
         self.logger = logging.getLogger(self.__module__ + "." +
                                         self.__class__.__name__)
 
-    def _train(self, X: np.ndarray, y: np.ndarray):
+    def _train(self, X: np.ndarray, y: np.ndarray, context:np.ndarray=None):
         """Trains the random forest on X and y.
 
         Parameters
