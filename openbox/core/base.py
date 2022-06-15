@@ -105,7 +105,10 @@ def build_surrogate(func_str='gp', config_space=None, rng=None, history_hpo_data
     func_str = func_str.lower()
     types, bounds = get_types(config_space)
     seed = rng.randint(MAXINT)
-    if func_str == 'prf':
+    if func_str == 'linear':
+        from openbox.surrogate.base.index_space_model import IndexSpaceModel
+        return IndexSpaceModel(config_space)
+    elif func_str == 'prf':
         try:
             from openbox.surrogate.base.rf_with_instances import RandomForestWithInstances
             return RandomForestWithInstances(types=types, bounds=bounds, seed=seed)

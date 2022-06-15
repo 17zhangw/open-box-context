@@ -59,7 +59,7 @@ class Advisor(object, metaclass=abc.ABCMeta):
         # Init the basic ingredients in Bayesian optimization.
         self.history_bo_data = history_bo_data
         self.surrogate_type = surrogate_type
-        self.constraint_surrogate_type = None
+        self.constraint_surrogate_type = 'linear'
         self.acq_type = acq_type
         self.acq_optimizer_type = acq_optimizer_type
         self.init_num = initial_trials
