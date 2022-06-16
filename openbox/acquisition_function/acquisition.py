@@ -199,7 +199,7 @@ class EIC(EI):
 
     def __init__(self,
                  model: AbstractModel,
-                 constraint_models: List[GaussianProcess],
+                 constraint_models,
                  par: float = 0.0,
                  **kwargs):
         """Constructor
@@ -234,9 +234,10 @@ class EIC(EI):
         """
         f = super()._compute(X)
         for model in self.constraint_models:
-            m, v = model.predict_marginalized_over_instances(X)
-            s = np.sqrt(v)
-            f *= norm.cdf(-m / s)
+            # m, v = model.predict_marginalized_over_instances(X)
+            # s = np.sqrt(v)
+            # f *= norm.cdf(-m / s)
+            f *= model.p_feasible(X)
         return f
 
 
