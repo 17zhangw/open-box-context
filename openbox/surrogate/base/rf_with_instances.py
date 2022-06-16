@@ -6,6 +6,7 @@ import typing
 
 import numpy as np
 from pyrfr import regression
+from scipy.stats import norm
 
 from openbox.surrogate.base.base_model import  AbstractModel
 from openbox.utils.constants import N_TREES
@@ -113,7 +114,7 @@ class RandomForestWithInstances(AbstractModel):
         self.logger = logging.getLogger(self.__module__ + "." +
                                         self.__class__.__name__)
 
-    def _train(self, X: np.ndarray, y: np.ndarray, context:np.ndarray=None):
+    def _train(self, X: np.ndarray, Y: np.ndarray, contexts:np.ndarray=None):
         """Trains the random forest on X and y.
 
         Parameters
@@ -129,7 +130,7 @@ class RandomForestWithInstances(AbstractModel):
         """
 
         self.X = X
-        self.y = y.flatten()
+        self.y = Y.flatten()
 
         if self.n_points_per_tree <= 0:
             self.rf_opts.num_data_points_per_tree = self.X.shape[0]
@@ -290,3 +291,9 @@ class RandomForestWithInstances(AbstractModel):
             var = var.reshape((-1, 1))
 
         return mean, var
+
+    def p_feasible(self, X: np.ndarray):
+        m, v = self.predict_marginalized_over_instances(X)
+        s = np.sqrt(v)
+        return norm.cdf(-m / s)
+

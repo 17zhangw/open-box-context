@@ -134,7 +134,7 @@ class AbstractModel(object):
                     dtype=np.uint,
                 )
 
-        return self._train(X, Y, contexts)
+        return self._train(X=X, Y=Y, contexts=contexts)
 
     def _train(self, X: np.ndarray, Y: np.ndarray, contexts: np.ndarray=None) -> 'AbstractModel':
         """Trains the random forest on X and y.

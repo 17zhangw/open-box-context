@@ -31,6 +31,7 @@ class Advisor(object, metaclass=abc.ABCMeta):
                  rand_prob=0.1,
                  optimization_strategy='bo',
                  surrogate_type='auto',
+                 constraint_surrogate_type=None,
                  acq_type='auto',
                  acq_optimizer_type='auto',
                  ref_point=None,
@@ -59,7 +60,7 @@ class Advisor(object, metaclass=abc.ABCMeta):
         # Init the basic ingredients in Bayesian optimization.
         self.history_bo_data = history_bo_data
         self.surrogate_type = surrogate_type
-        self.constraint_surrogate_type = 'linear'
+        self.constraint_surrogate_type = constraint_surrogate_type
         self.acq_type = acq_type
         self.acq_optimizer_type = acq_optimizer_type
         self.init_num = initial_trials
@@ -240,11 +241,13 @@ class Advisor(object, metaclass=abc.ABCMeta):
                                                     rng=self.rng,
                                                     history_hpo_data=self.history_bo_data)
                                     for _ in range(self.num_objs)]
+        self.logger.info('Build Objective Surrogate Model: {}'.format(self.surrogate_type))
 
         if self.num_constraints > 0:
             self.constraint_models = [build_surrogate(func_str=self.constraint_surrogate_type,
                                                       config_space=self.config_space,
                                                       rng=self.rng) for _ in range(self.num_constraints)]
+        self.logger.info('Build Constraint Surrogate Models: {}'.format(self.constraint_surrogate_type))
 
         if self.acq_type in ['mesmo', 'mesmoc', 'mesmoc2', 'usemo']:
             self.acquisition_function = build_acq_func(func_str=self.acq_type,

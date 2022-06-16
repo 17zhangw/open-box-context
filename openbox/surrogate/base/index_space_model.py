@@ -27,7 +27,7 @@ class IndexSpaceModel:
 
         self.logger.info('All index sizes: {}'.format(self.all_index_sizes))
 
-    def train(self, X, cY):
+    def train(self, X, cY, contexts: np.ndarray=None):
         return
 
     def p_feasible(self, X: np.ndarray):
