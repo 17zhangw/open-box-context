@@ -114,7 +114,7 @@ class RandomForestWithInstances(AbstractModel):
         self.logger = logging.getLogger(self.__module__ + "." +
                                         self.__class__.__name__)
 
-    def _train(self, X: np.ndarray, Y: np.ndarray, contexts:np.ndarray=None):
+    def _train(self, X: np.ndarray, y: np.ndarray, contexts:np.ndarray=None):
         """Trains the random forest on X and y.
 
         Parameters
@@ -130,7 +130,7 @@ class RandomForestWithInstances(AbstractModel):
         """
 
         self.X = X
-        self.y = Y.flatten()
+        self.y = y.flatten()
 
         if self.n_points_per_tree <= 0:
             self.rf_opts.num_data_points_per_tree = self.X.shape[0]
