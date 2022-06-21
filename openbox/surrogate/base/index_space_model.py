@@ -7,7 +7,7 @@ from openbox.utils.logging_utils import get_logger
 class IndexSpaceModel:
     def __init__(self, config_space: ConfigurationSpace,
                  budget=1500,
-                 history='/data2/changzhuo.cz/IndexTool/data/indexsize.json', # {'table.column': index_size}
+                 history='/tmp/indexsize.json', # {'table.column': index_size}
                  ):
         self.budget = budget
         self.config_space = config_space
@@ -25,7 +25,7 @@ class IndexSpaceModel:
             index = hp[6:]
             self.all_index_sizes[i] = float(index_size[index])
 
-        self.logger.info('All index sizes: {}'.format(self.all_index_sizes))
+        self.logger.debug('All index sizes: {}'.format(self.all_index_sizes))
 
     def train(self, X, cY, contexts: np.ndarray=None):
         return
