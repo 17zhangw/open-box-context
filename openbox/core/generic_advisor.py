@@ -40,6 +40,7 @@ class Advisor(object, metaclass=abc.ABCMeta):
                  random_state=None,
                  current_context=None,
                  context_pca_components=6,
+                 constraint_budget=None,
                  **kwargs):
 
         # Create output (logging) directory.
@@ -77,14 +78,6 @@ class Advisor(object, metaclass=abc.ABCMeta):
             self.history_container = MOHistoryContainer(task_id, self.num_objs, self.num_constraints,
                                                         config_space=self.config_space, ref_point=ref_point)
 
-        # initial design
-        if initial_configurations is not None and len(initial_configurations) > 0:
-            self.initial_configurations = initial_configurations
-            self.init_num = len(initial_configurations)
-        else:
-            self.initial_configurations = self.create_initial_design(self.init_strategy)
-            self.init_num = len(self.initial_configurations)
-
         self.surrogate_model = None
         self.constraint_models = None
         self.acquisition_function = None
@@ -93,6 +86,16 @@ class Advisor(object, metaclass=abc.ABCMeta):
         self.algo_auto_selection()
         self.check_setup()
         self.setup_bo_basics()
+
+        self.constraint_budget = constraint_budget
+
+        # initial design
+        if initial_configurations is not None and len(initial_configurations) > 0:
+            self.initial_configurations = initial_configurations
+            self.init_num = len(initial_configurations)
+        else:
+            self.initial_configurations = self.create_initial_design(self.init_strategy)
+            self.init_num = len(self.initial_configurations)
 
 
     def algo_auto_selection(self):
@@ -458,7 +461,10 @@ class Advisor(object, metaclass=abc.ABCMeta):
         while len(configs) < num_configs:
             config = self.config_space.sample_configuration()
             sample_cnt += 1
-            if config not in (history_container.configurations + configs) and config not in excluded_configs:
+            if config not in (history_container.configurations + configs) \
+                    and config not in excluded_configs \
+                    and self.constraint_models[0].get_cost(config) < self.constraint_budget:
+                # self.logger.debug('predicated space cost {}'.format(self.constraint_models[0].get_cost(config)))
                 configs.append(config)
                 sample_cnt = 0
                 continue

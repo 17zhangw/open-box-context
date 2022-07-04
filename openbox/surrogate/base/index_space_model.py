@@ -2,6 +2,7 @@ import json
 import numpy as np
 from openbox.utils.config_space import ConfigurationSpace, Configuration
 from openbox.utils.logging_utils import get_logger
+from openbox.utils.config_space.util import convert_configurations_to_array
 
 
 class IndexSpaceModel:
@@ -35,4 +36,9 @@ class IndexSpaceModel:
         p = np.array((cost < self.budget), dtype=np.float64)
         p = np.reshape(p, (-1, 1))
         return p
+
+    def get_cost(self, config):
+        X = convert_configurations_to_array([config,])
+        cost = np.dot(X, self.all_index_sizes)
+        return cost
 
