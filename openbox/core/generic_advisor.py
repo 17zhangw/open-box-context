@@ -473,8 +473,15 @@ class Advisor(object, metaclass=abc.ABCMeta):
                 sample_cnt = 0
                 continue
             if sample_cnt >= max_sample_cnt:
-                self.logger.warning('Cannot sample non duplicate configuration after %d iterations.' % max_sample_cnt)
-                configs.append(config)
+                #self.logger.warning('Cannot sample non duplicate configuration after %d iterations.' % max_sample_cnt)
+                new_config = config.get_dictionary()
+                for key in list(new_config.keys()):
+                    new_config[key] = 'off'
+
+                choice = np.random.choice(list(new_config.keys()),1)[0]
+                new_config[choice] = 'on'
+                from openbox.utils.config_space import Configuration
+                configs.append(Configuration(config.configuration_space, values=new_config))
                 sample_cnt = 0
         return configs
 
