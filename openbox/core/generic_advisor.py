@@ -49,7 +49,6 @@ class Advisor(object, metaclass=abc.ABCMeta):
         self.num_objs = num_objs
         self.num_constraints = num_constraints
         self.constraint_budget = constraint_budget
-        print(self.constraint_budget)
         self.init_strategy = init_strategy
         self.output_dir = output_dir
         self.task_id = task_id
