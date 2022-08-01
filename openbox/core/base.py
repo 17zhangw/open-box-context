@@ -100,14 +100,15 @@ def build_optimizer(func_str='local_random', acq_func=None, config_space=None, r
                      rng=rng)
 
 
-def build_surrogate(func_str='gp', config_space=None, rng=None, history_hpo_data=None, current_context=None, context_pca_components=6):
+def build_surrogate(func_str='gp', config_space=None, rng=None, history_hpo_data=None, current_context=None,
+                    context_pca_components=6, budget=1500, history='/tmp/indexsize.json'):
     assert config_space is not None
     func_str = func_str.lower()
     types, bounds = get_types(config_space)
     seed = rng.randint(MAXINT)
     if func_str == 'linear':
         from openbox.surrogate.base.index_space_model import IndexSpaceModel
-        return IndexSpaceModel(config_space)
+        return IndexSpaceModel(config_space, budget=budget, history=history)
     elif func_str == 'prf':
         try:
             from openbox.surrogate.base.rf_with_instances import RandomForestWithInstances

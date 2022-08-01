@@ -48,6 +48,8 @@ class Advisor(object, metaclass=abc.ABCMeta):
         # Random seed generator.
         self.num_objs = num_objs
         self.num_constraints = num_constraints
+        self.constraint_budget = constraint_budget
+        print(self.constraint_budget)
         self.init_strategy = init_strategy
         self.output_dir = output_dir
         self.task_id = task_id
@@ -86,8 +88,6 @@ class Advisor(object, metaclass=abc.ABCMeta):
         self.algo_auto_selection()
         self.check_setup()
         self.setup_bo_basics()
-
-        self.constraint_budget = constraint_budget
 
         # initial design
         if initial_configurations is not None and len(initial_configurations) > 0:
@@ -249,8 +249,13 @@ class Advisor(object, metaclass=abc.ABCMeta):
         if self.num_constraints > 0:
             self.constraint_models = [build_surrogate(func_str=self.constraint_surrogate_type,
                                                       config_space=self.config_space,
+                                                      budget=self.constraint_budget,
                                                       rng=self.rng) for _ in range(self.num_constraints)]
-        self.logger.info('Build Constraint Surrogate Models: {}'.format(self.constraint_surrogate_type))
+            if self.constraint_surrogate_type == 'linear':
+                self.logger.info('Build Constraint Surrogate Models: {}, budget {}'.format(
+                    self.constraint_surrogate_type,
+                    self.constraint_models[0].budget
+                ))
 
         if self.acq_type in ['mesmo', 'mesmoc', 'mesmoc2', 'usemo']:
             self.acquisition_function = build_acq_func(func_str=self.acq_type,
