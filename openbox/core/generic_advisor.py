@@ -421,6 +421,8 @@ class Advisor(object, metaclass=abc.ABCMeta):
 
             for config in challengers.challengers:
                 if config not in history_container.configurations:
+                    if self.constraint_models[0].get_cost(config) > self.constraint_budget:
+                        self.logger.info('Suggest an infeasible config! origin: {%s}' % config.origin)
                     return config
             self.logger.warning('Cannot get non duplicate configuration from BO candidates (len=%d). '
                                 'Sample random config.' % (len(challengers.challengers), ))
