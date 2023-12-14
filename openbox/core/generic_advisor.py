@@ -40,6 +40,7 @@ class Advisor(object, metaclass=abc.ABCMeta):
                  random_state=None,
                  current_context=None,
                  context_pca_components=6,
+                 indexsize_file="/tmp/indexsize.json",
                  constraint_budget=None,
                  **kwargs):
 
@@ -49,6 +50,7 @@ class Advisor(object, metaclass=abc.ABCMeta):
         self.num_objs = num_objs
         self.num_constraints = num_constraints
         self.constraint_budget = constraint_budget
+        self.indexsize_file = indexsize_file
         self.init_strategy = init_strategy
         self.output_dir = output_dir
         self.task_id = task_id
@@ -236,12 +238,14 @@ class Advisor(object, metaclass=abc.ABCMeta):
                                                    rng=self.rng,
                                                    history_hpo_data=self.history_bo_data,
                                                    current_context=self.current_context,
-                                                   context_pca_components=self.context_pca_components)
+                                                   context_pca_components=self.context_pca_components,
+                                                   history=self.indexsize_file)
         else:  # multi-objectives
             self.surrogate_model = [build_surrogate(func_str=self.surrogate_type,
                                                     config_space=self.config_space,
                                                     rng=self.rng,
-                                                    history_hpo_data=self.history_bo_data)
+                                                    history_hpo_data=self.history_bo_data,
+                                                    history=self.indexsize_file)
                                     for _ in range(self.num_objs)]
         self.logger.info('Build Objective Surrogate Model: {}'.format(self.surrogate_type))
 
@@ -249,7 +253,8 @@ class Advisor(object, metaclass=abc.ABCMeta):
             self.constraint_models = [build_surrogate(func_str=self.constraint_surrogate_type,
                                                       config_space=self.config_space,
                                                       budget=self.constraint_budget,
-                                                      rng=self.rng) for _ in range(self.num_constraints)]
+                                                      rng=self.rng,
+                                                      history=self.indexsize_file) for _ in range(self.num_constraints)]
             if self.constraint_surrogate_type == 'linear':
                 self.logger.info('Build Constraint Surrogate Models: {}, budget {}'.format(
                     self.constraint_surrogate_type,

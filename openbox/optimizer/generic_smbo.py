@@ -119,6 +119,7 @@ class SMBO(BOBase):
                  advisor_kwargs: dict = None,
                  current_context: np.ndarray=None,
                  context_pca_components: int=6,
+                 indexsize_file="/tmp/indexsize.json",
                  **kwargs):
 
         if task_id is None:
@@ -156,59 +157,8 @@ class SMBO(BOBase):
                                           random_state=random_state,
                                           current_context = self.current_context,
                                           context_pca_components = self.context_pca_components,
+                                          indexsize_file=indexsize_file,
                                           **advisor_kwargs)
-        elif advisor_type == 'mcadvisor':
-            from openbox.core.mc_advisor import MCAdvisor
-            self.config_advisor = MCAdvisor(config_space,
-                                            num_objs=num_objs,
-                                            num_constraints=num_constraints,
-                                            initial_trials=initial_runs,
-                                            init_strategy=init_strategy,
-                                            initial_configurations=initial_configurations,
-                                            optimization_strategy=sample_strategy,
-                                            surrogate_type=surrogate_type,
-                                            acq_type=acq_type,
-                                            acq_optimizer_type=acq_optimizer_type,
-                                            ref_point=ref_point,
-                                            history_bo_data=history_bo_data,
-                                            task_id=task_id,
-                                            output_dir=logging_dir,
-                                            random_state=random_state,
-                                            **advisor_kwargs)
-        elif advisor_type == 'tpe':
-            from openbox.core.tpe_advisor import TPE_Advisor
-            assert num_objs == 1 and num_constraints == 0
-            self.config_advisor = TPE_Advisor(config_space, task_id=task_id, random_state=random_state,
-                                              **advisor_kwargs)
-        elif advisor_type == 'ea':
-            from openbox.core.ea_advisor import EA_Advisor
-            assert num_objs == 1 and num_constraints == 0
-            self.config_advisor = EA_Advisor(config_space,
-                                             num_objs=num_objs,
-                                             num_constraints=num_constraints,
-                                             optimization_strategy=sample_strategy,
-                                             batch_size=1,
-                                             task_id=task_id,
-                                             output_dir=logging_dir,
-                                             random_state=random_state,
-                                             **advisor_kwargs)
-        elif advisor_type == 'random':
-            from openbox.core.random_advisor import RandomAdvisor
-            self.config_advisor = RandomAdvisor(config_space,
-                                                num_objs=num_objs,
-                                                num_constraints=num_constraints,
-                                                initial_trials=initial_runs,
-                                                init_strategy=init_strategy,
-                                                initial_configurations=initial_configurations,
-                                                surrogate_type=surrogate_type,
-                                                acq_type=acq_type,
-                                                acq_optimizer_type=acq_optimizer_type,
-                                                ref_point=ref_point,
-                                                history_bo_data=history_bo_data,
-                                                task_id=task_id,
-                                                output_dir=logging_dir,
-                                                random_state=random_state,
-                                                **advisor_kwargs)
         else:
             raise ValueError('Invalid advisor type!')
 
