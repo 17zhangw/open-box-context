@@ -205,6 +205,7 @@ class SMBO(BOBase):
                 else:
                     # parse result
                     objs, constraints = get_result(_result)
+                    config = _result.get("config", config)
             except Exception as e:
                 # parse result of failed trial
                 if isinstance(e, TimeoutException):
